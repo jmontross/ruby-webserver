@@ -6,12 +6,15 @@ endpoints:
       address: 450 S. First Street San Jose, CA 95113
   view: 
     http_method: get
-    viewables:
-      name: downtown_yoga_shala
-      description:     
+    viewables:  [{!ruby/sym name: downtown_yoga_shala, !ruby/sym description: awesome yoga place - each wednesday six am}]
   create: 
     http_method: post
     receivables: 
       name:
       description:
-      address:      
+      address:  
+      name:
+  read: 
+    http_method: get
+    receivables: 
+      name:
