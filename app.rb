@@ -4,23 +4,9 @@ require 'webrick'
 require 'erb'
 require 'json'
 
-port = 8000
 # make it 80 if you want.  be sure to run as sudo.  
-
-# server = TCPServer.new("0.0.0.0", 8080)
-
-# while session = server.accept
-#   session.print "HTTP/1.1 200/OK\r\nContent-type:text/html\r\n\r\n"
-#   if request = session.gets
-#     filename = request.gsub(/GET\ \//, '').gsub(/\ HTTP.*/, '').chomp
-#     filename = "index.html" if filename == ""
-    
-#     session.print "You asked for a file called #{filename}"
-
-
-#   end
-#   session.close 
-# end
+port = 8000
+# note - when I ran on port 80 it conflicted with things on my computer
 
 ROUTES = YAML.load_file('config/rest_endpoints.yml')
 
@@ -86,8 +72,7 @@ class View < WEBrick::HTTPServlet::AbstractServlet
 
   # Construct the return HTML page
   def show_items(request)  	
-    starting_items = ROUTES['endpoints']['view']['viewables']
-    # ['endpoints']['view']['viewables']
+    starting_items = ROUTES['endpoints']['view']['viewables']    
 
     # => [{:name=>"downtown_yoga_shala", :description=>"awesome yoga place - each wednesday six am"}] 
     
@@ -107,18 +92,6 @@ class View < WEBrick::HTTPServlet::AbstractServlet
     html += "Name: <input type='textbox' name='name' /><br /><br />";
     html += "Description: <input type='textbox' name='description' /><br /><br />";
     html += "Address: <input type='textbox' name='address' /><br /><br />";
-
-    # dbh = DBI.connect("DBI:Mysql:webarchive:localhost", "root", "pass")
-    # sth = dbh.execute("SELECT headline, story, id FROM yahoo_news where date >= '2004-12-01' and date <= '2005-01-01'")
-
-    #   # iterate over every returned news-story from the database
-    #   while row = sth.fetch_hash do
-    #       html += "<b>#{row['headline']}</b><br />\n"
-    #       html += "#{row['story']}<br />\n"
-    #       html += "<input type='textbox' name='#{row['id']}' /><br /><br />\n"
-    #  end
-    #  sth.finish
-
     html += "<input type='submit'></form></body></html>"
 
     # Return OK (200), content-type: text/html, followed by the HTML itself
@@ -141,10 +114,7 @@ class Read < WEBrick::HTTPServlet::AbstractServlet
   # Construct the return HTML page
   def show_items(request)  	
 
-    starting_items = ROUTES['endpoints']['view']['viewables']
-    # ['endpoints']['view']['viewables']
-
-    # => [{:name=>"downtown_yoga_shala", :description=>"awesome yoga place - each wednesday six am"}] 
+    starting_items = ROUTES['endpoints']['view']['viewables']   
     
     json = []
     starting_items.each do |item|
@@ -163,17 +133,20 @@ class Read < WEBrick::HTTPServlet::AbstractServlet
 
 end
 
-## for images need to set DocumentRoot: "/Users/jmontross/github/jmontross/ruby_webserver" -- not working...
-server = WEBrick::HTTPServer.new(:Port => port)
+## for images need to set DocumentRoot: ... make sure to run this from base of the app at ~/ruby_weberver
+server = WEBrick::HTTPServer.new(:Port => port,DocumentRoot: Dir.pwd)
+
+## loop over routes and mount each route to its class.  
+## this is not very extensible as you need a new class for each route in the config. 
 
 ROUTES['endpoints'].each do |route,configuration| 
   # register route to http_action
-  puts "mounting /#{route}"
+  puts "mounting /#{route}"  
   server.mount "/#{route}", Kernel.const_get(route.capitalize)  
 end
 
-## just to get somethign at the base
-server.mount '/', Map
-
+puts 
+"shutdown with ctrl+c"
+# shutdown server when i do ctrl+c
 trap "INT" do server.shutdown end
 server.start

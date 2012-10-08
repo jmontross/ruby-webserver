@@ -28,3 +28,5 @@ http://stackoverflow.com/questions/5973704/serving-images-using-webrick
 http://www.scribd.com/doc/20755982/The-Ruby-1-9-x-Web-Servers-Booklet
 
   note - uses rvm with 1.9.2 and a gemset called rweb - this is because I wanted no gems on the system for it to work :)
+
+  To run - sudo ruby app.rb
